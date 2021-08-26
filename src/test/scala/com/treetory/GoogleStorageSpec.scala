@@ -30,6 +30,9 @@ class GoogleStorageSpec extends AnyWordSpec with Matchers with ScalaFutures{
         url.getQuery should include("Expires")
         url.getQuery should include("Signature")
         println(url.toURI.toString)
+
+        val flag = googleStorage.delete(testFileName)
+        flag shouldBe(true)
       }
     }
 

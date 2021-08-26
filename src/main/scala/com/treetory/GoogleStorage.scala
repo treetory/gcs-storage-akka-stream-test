@@ -1,7 +1,7 @@
 package com.treetory
 
 import com.google.cloud.http.HttpTransportOptions
-import com.google.cloud.storage.{Blob, Storage, StorageOptions}
+import com.google.cloud.storage.{Blob, BlobId, Storage, StorageOptions}
 
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -28,6 +28,11 @@ trait GoogleStorage {
   def getBlob(fileName: String): Blob = {
     storage.get(config.google.storage.project.bucket)
       .get(fileName)
+  }
+
+  def delete(fileName: String): Boolean = {
+    val blobId = BlobId.of(config.google.storage.project.bucket, fileName)
+    storage.delete(blobId)
   }
 }
 
