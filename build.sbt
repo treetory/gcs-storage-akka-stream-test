@@ -1,3 +1,4 @@
+
 name := "gcs-storage-akka-stream-test"
 
 version := "0.1"
@@ -25,3 +26,10 @@ libraryDependencies ++= {
   )
 }
 //idePackagePrefix := Some("com.treetory")
+assembly / assemblyMergeStrategy := {
+  case PathList("module-info.class") => MergeStrategy.discard
+  case x if x.endsWith("/module-info.class") => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assembly / assemblyMergeStrategy).value
+    oldStrategy(x)
+}
