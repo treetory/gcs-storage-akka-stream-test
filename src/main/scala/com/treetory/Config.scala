@@ -34,7 +34,7 @@ object Config {
 }
 
 class Config() {
-  private val config = ConfigFactory.load()
+  private val config = ConfigFactory.load("reference.conf")
   private val googleConfig = config.getConfig("google")
 
   private val googleStorageConfig = config.getConfig("googleStorage")
