@@ -17,8 +17,20 @@ class GcsRestClientActor extends Actor with ActorLogging {
 
   val http = Http(ActorSystem(Behaviors.empty, "SingleRequest"))
 
+  val scheme = "http"
+  val host = "localhost"
+  val port = 3000
+  val path = Uri.Path("/api/v1/gcs")
+
   def getSignedURL(fileName: String): Future[HttpResponse] = {
-    val uri: Uri = s"http://localhost:3000/api/v1/gcs?fileName=${fileName}"
+
+    val uri = Uri()
+      .withScheme(scheme)
+      .withHost(host)
+      .withPort(port)
+      .withPath(path)
+      .withQuery(Uri.Query(s"fileName=${fileName}"))
+
     logger.info("{}", uri)
     http.singleRequest(HttpRequest(HttpMethods.GET, uri))
   }
