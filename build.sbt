@@ -46,8 +46,9 @@ lazy val root = (project in file("."))
         "ch.qos.logback"    % "logback-classic"           % "1.2.3",
         "com.typesafe.akka" %% "akka-http-testkit"        % akkaHttpVersion % Test,
         "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion     % Test,
-        "org.scalatest"     %% "scalatest" % "3.2.0"      % Test,
-        "com.google.cloud"  % "google-cloud-storage"      % "1.113.0"
+        "org.scalatest"     %% "scalatest"                % "3.2.0"      % Test,
+        "com.google.cloud"  % "google-cloud-storage"      % "1.113.0",
+        "org.scalaj"        %% "scalaj-http"              % "2.4.2"
       )
     }
   )

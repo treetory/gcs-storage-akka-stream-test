@@ -30,6 +30,10 @@ trait GoogleStorage {
       .get(fileName)
   }
 
+  def list(fileName: String): Any = {
+    storage.list(config.google.storage.project.bucket)
+  }
+
   def delete(fileName: String): Boolean = {
     val blobId = BlobId.of(config.google.storage.project.bucket, fileName)
     storage.delete(blobId)

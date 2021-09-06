@@ -3,10 +3,11 @@ package com.treetory
 import akka.http.scaladsl.model.{StatusCodes, Uri}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
+import org.slf4j.LoggerFactory
 
 object GoogleStorageRoute {
-  //#user-routes-class
-  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+
+  def logger = LoggerFactory.getLogger(this.getClass)
 
   val googleStorage = GoogleStorage
 
@@ -16,7 +17,7 @@ object GoogleStorageRoute {
         get {
           parameter('fileName.as[String]) { (fileName) =>
             val signedURL = googleStorage.signedUrlFor(fileName).get
-//            complete(signedURL.toURI.toString)
+            complete(signedURL.toURI.toString)
             redirect(Uri.apply(signedURL.toURI.toString), StatusCodes.TemporaryRedirect)
           }
         }
