@@ -1,6 +1,6 @@
 package com.treetory
 
-import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import org.slf4j.LoggerFactory
@@ -22,7 +22,14 @@ object AkkaHttpClientTestRoute {
           parameter('fileName.as[String]) { (fileName) =>
             rejectEmptyResponse {
               onSuccess(getSignedURL(fileName)) { response =>
-                complete(response.getHeader("Location").get().value())
+                logger.info("{}", response.status.intValue());
+                if (response.status.intValue() == 307) {
+                  redirect(response.getHeader("Location").get().value(), StatusCodes.TemporaryRedirect)
+                } else if (response.status.intValue() == 200) {
+                  complete(StatusCodes.OK)
+                } else {
+                  complete(StatusCodes.NotFound)
+                }
               }
             }
           }

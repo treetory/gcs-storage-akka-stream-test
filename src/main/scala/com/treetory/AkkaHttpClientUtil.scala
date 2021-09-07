@@ -8,7 +8,14 @@ import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
 
-class AkkaHttpClientUtil(implicit sendHttpRequest: HttpRequest => Future[HttpResponse] = Http(ActorSystem(Behaviors.empty, "SingleRequest")).singleRequest(_)) {
+class AkkaHttpClientUtil(implicit sendHttpRequest: HttpRequest => Future[HttpResponse] = Http(
+  /*ActorSystem(Behaviors.empty, "SingleRequest")*/
+  /*HttpClientConfig.client*/
+  AkkaHttpClientConfig.client)
+  .singleRequest(_
+    /*,HttpClientConfig.context*/
+    ,AkkaHttpClientConfig.context
+  )) {
 
   def logger = LoggerFactory.getLogger(this.getClass)
 

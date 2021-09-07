@@ -36,13 +36,13 @@ object QuickstartApp {
 //      startHttpServer(routes.userRoutes)(context.system)
 
       //val routes = GoogleStorageRoute
-      //val routes = AkkaHttpClientTestRoute
-      val routes = GcsRestClientRoutes
+      val routes = AkkaHttpClientTestRoute
+//      val routes = GcsRestClientRoutes
 
       startHttpServer(
         //routes.googleStorageRoutes
-        //routes.akkaHttpClientRoutes
-        routes.gcsRestClientRoutes
+        routes.akkaHttpClientRoutes
+//        routes.gcsRestClientRoutes
       )(context.system)
 
       Behaviors.empty
