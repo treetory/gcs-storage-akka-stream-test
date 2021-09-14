@@ -35,13 +35,19 @@ object QuickstartApp {
 //      val routes = new UserRoutes(userRegistryActor)(context.system)
 //      startHttpServer(routes.userRoutes)(context.system)
 
-      //val routes = GoogleStorageRoute
-      val routes = AkkaHttpClientTestRoute
+//      val routes = GoogleStorageRoute
+//      val routes = AkkaHttpClientTestRoute
 //      val routes = GcsRestClientRoutes
 
+        val fakerRegistryActor = context.spawn(FakerRegistry(), "FakerRegistryActor")
+        context.watch(fakerRegistryActor)
+
+        val routes = new FakerRoutes(fakerRegistryActor)(context.system)
+
       startHttpServer(
-        //routes.googleStorageRoutes
-        routes.akkaHttpClientRoutes
+        routes.fakerRoutes
+//        routes.googleStorageRoutes
+//        routes.akkaHttpClientRoutes
 //        routes.gcsRestClientRoutes
       )(context.system)
 

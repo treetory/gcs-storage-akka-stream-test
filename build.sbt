@@ -48,7 +48,8 @@ lazy val root = (project in file("."))
         "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion     % Test,
         "org.scalatest"     %% "scalatest"                % "3.2.0"      % Test,
         "com.google.cloud"  % "google-cloud-storage"      % "1.113.0",
-        "org.scalaj"        %% "scalaj-http"              % "2.4.2"
+        "org.scalaj"        %% "scalaj-http"              % "2.4.2",
+        "org.apache.poi"    % "poi-ooxml"                 % "3.17"
       )
     }
   )
@@ -59,21 +60,8 @@ lazy val IntegrationTest = config("it") extend Test
 inThisBuild(
   List(
     licenses := Seq("MIT" -> url("http://opensource.org/licenses/MIT")),
-    homepage := Some(url("https://github.com/emartech/gcs-bigquery-scala-api")),
     developers := List(
-      Developer("mfawal", "Margit Fawal", "margit.fawal@emarsys.com", url("https://github.com/mfawal")),
-      Developer("andrasp3a", "Andras Papp", "andras.papp@emarsys.com", url("https://github.com/andrasp3a")),
-      Developer("bkiss1988", "Balazs Kiss", "balazs.kiss@emarsys.com", url("https://github.com/bkiss1988")),
-      Developer("itsdani", "Daniel Segesdi", "daniel.segesdi@emarsys.com", url("https://github.com/itsdani")),
-      Developer("miklos-martin", "Miklos Martin", "miklos.martin@gmail.com", url("https://github.com/miklos-martin")),
-      Developer("suliatis", "Attila Suli", "attila.suli@emarsys.com", url("https://github.com/suliatis")),
-      Developer("galatt", "Attila Peter Gal", "attila.gal@emarsys.com", url("https://github.com/galatt"))
-    ),
-    scmInfo := Some(
-      ScmInfo(
-        url("https://github.com/emartech/gcs-bigquery-scala-api"),
-        "scm:git:git@github.com:emartech/gcs-bigquery-scala-api.git"
-      )
+      Developer("treetory", "InHwan Chun", "treetory@gmail.com", url("https://github.com/treetory"))
     ),
     // These are the sbt-release-early settings to configure
     pgpPublicRing := file("./ci/local.pubring.asc"),
