@@ -5,8 +5,9 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, Uri}
+import akka.http.scaladsl.model.{HttpHeader, HttpMethods, HttpRequest, HttpResponse, Uri}
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import com.treetory.ExcelExporterUtil.`export`
 import org.slf4j.LoggerFactory
 import spray.json.DefaultJsonProtocol.{jsonFormat1, jsonFormat15, _}
 import spray.json._
@@ -39,8 +40,9 @@ object FakerRegistry {
   implicit val dispatcher = system.dispatcher
 
   sealed trait Command
-  final case class GetFakers(replyTo: ActorRef[Future[String]]) extends Command
+  final case class GetFakers(count:Int, replyTo: ActorRef[Future[String]]) extends Command
   final case class ConvertToFakers(text: String, replyTo: ActorRef[Seq[Faker]]) extends Command
+  final case class CreateExcel(fakers: Seq[Faker], replyTo: ActorRef[Unit]) extends Command
 
   def logger = LoggerFactory.getLogger(this.getClass)
 
@@ -52,23 +54,25 @@ object FakerRegistry {
   val port = 7000
   val path = Uri.Path("/api/faker")
 
-  def getMockup(): Future[String] = {
+  def getMockup(count: Int): Future[String] = {
     val uri = Uri()
       .withScheme(scheme)
       .withHost(host)
       .withPort(port)
       .withPath(path.+("/mockup"))
+      .withQuery(Uri.Query(s"count=${count}"))
 
     logger.info("{}", uri)
     val responseFuture : Future[HttpResponse] = http.singleRequest(HttpRequest(HttpMethods.GET, uri))
     responseFuture
-      .flatMap(_.entity.toStrict(60.seconds)
+      .flatMap(_
+        .entity
+        .withoutSizeLimit()
+        .toStrict(60.seconds, 100000000)
         .map(res => {
           val str: String = res.data.utf8String
           str
         })
-//        .map(str => convertToFaker(str.data.utf8String))
-//        .map(_ => Unmarshal(_).to[Fakers])
       )
   }
 
@@ -99,11 +103,14 @@ object FakerRegistry {
 
   private def registry(): Behavior[Command] =
     Behaviors.receiveMessage {
-      case GetFakers(replyTo) =>
-        replyTo ! getMockup()
+      case GetFakers(count: Int, replyTo) =>
+        replyTo ! getMockup(count)
         Behaviors.same
-      case ConvertToFakers(text, replyTo) =>
+      case ConvertToFakers(text: String, replyTo) =>
         replyTo ! convertToFakers(text)
+        Behaviors.same
+      case CreateExcel(faker: Seq[Faker], replyTo) =>
+        replyTo ! export(faker)
         Behaviors.same
     }
 
