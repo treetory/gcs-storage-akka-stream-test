@@ -97,4 +97,8 @@ object ExcelExporterUtil {
     workbook.write(fileOut)
     workbook.close()
   }
+
+  def getExcel(): File = {
+    new File("./fakerExport.xlsx")
+  }
 }
