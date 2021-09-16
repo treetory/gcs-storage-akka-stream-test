@@ -1,7 +1,8 @@
-package com.treetory
+package com.treetory.route
 
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{_symbol2NR, complete, get, parameter, pathEnd, pathPrefix}
 import akka.http.scaladsl.server.Route
+import com.treetory.util.HttpClientUtil
 import org.slf4j.LoggerFactory
 
 object HttpClientTestRoute {

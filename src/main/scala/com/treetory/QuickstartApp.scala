@@ -4,6 +4,8 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.{Directives, Route}
+import com.treetory.actor.{FakerRegistry, UserRegistry}
+import com.treetory.route.{AkkaHttpClientTestRoute, FakerRoutes, GcsRestClientRoutes, GoogleStorageRoute, HttpClientTestRoute, UserRoutes}
 
 import scala.util.{Failure, Success}
 

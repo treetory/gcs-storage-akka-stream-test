@@ -1,4 +1,4 @@
-package com.treetory
+package com.treetory.config
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.{ConnectionContext, HttpsConnectionContext}

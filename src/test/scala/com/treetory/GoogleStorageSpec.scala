@@ -1,6 +1,7 @@
 package com.treetory
 
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.treetory.util.{AkkaHttpClientUtil, HttpClientUtil}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.slf4j.LoggerFactory

@@ -1,6 +1,7 @@
-package com.treetory
+package com.treetory.util
 
-import org.apache.poi.xssf.streaming.{SXSSFCell, SXSSFRow, SXSSFSheet, SXSSFWorkbook}
+import com.treetory.actor.Faker
+import org.apache.poi.xssf.streaming.{SXSSFSheet, SXSSFWorkbook}
 import org.slf4j.LoggerFactory
 
 import java.io.{File, FileOutputStream}
@@ -13,13 +14,13 @@ object ExcelExporterUtil {
 
 //    val tempFile = File.createTempFile("fakerExport", ".xlsx")
     val tempFile = new File("./fakerExport.xlsx")
-    val fileOut = new FileOutputStream(tempFile)
+    val fileOut  = new FileOutputStream(tempFile)
 
     val workbook = new SXSSFWorkbook
     workbook.setCompressTempFiles(true)
 
     val style = workbook.createCellStyle()
-    val font = workbook.createFont()
+    val font  = workbook.createFont()
     font.setBold(true)
     style.setFont(font)
 
@@ -30,20 +31,34 @@ object ExcelExporterUtil {
 
     var rowIndex: Int = 1
 
-    val columns = List("id", "title", "client", "area", "country", "contact",
-      "assignee", "progress", "startTimestamp", "endTimestamp", "budget",
-      "transaction", "account", "version", "available")
+    val columns = List(
+      "id",
+      "title",
+      "client",
+      "area",
+      "country",
+      "contact",
+      "assignee",
+      "progress",
+      "startTimestamp",
+      "endTimestamp",
+      "budget",
+      "transaction",
+      "account",
+      "version",
+      "available"
+    )
 
     // 셀 칼럼 크기 설정
     sample.map(f => {
       if (rowIndex == 1) {
-        for((columnName, index) <- columns.zipWithIndex) {
+        for ((columnName, index) <- columns.zipWithIndex) {
           val headerCell = headerRow.createCell(index)
           headerCell.setCellValue(columnName)
           headerCell.setCellStyle(style)
         }
       }
-      val row = sheet.createRow(rowIndex)
+      val row   = sheet.createRow(rowIndex)
       val cell0 = row.createCell(0)
       cell0.setCellValue(f.id)
       val cell1 = row.createCell(1)

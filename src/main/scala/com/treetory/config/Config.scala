@@ -1,11 +1,11 @@
-package com.treetory
+package com.treetory.config
 
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.services.storage.StorageScopes
 import com.google.auth.http.HttpTransportFactory
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.http.HttpTransportOptions.DefaultHttpTransportFactory
-import com.treetory.Config.{GoogleConfig, GoogleProjectConfig, GoogleStorageConfig}
+import com.treetory.config.Config.{GoogleConfig, GoogleProjectConfig, GoogleStorageConfig}
 import com.typesafe.config.{ConfigFactory, ConfigRenderOptions}
 
 import java.io.ByteArrayInputStream

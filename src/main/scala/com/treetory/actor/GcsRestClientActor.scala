@@ -1,4 +1,4 @@
-package com.treetory
+package com.treetory.actor
 
 import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors

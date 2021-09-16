@@ -1,10 +1,8 @@
-package com.treetory
+package com.treetory.actor
 
 //#user-registry-actor
-import akka.actor.typed.ActorRef
-import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import scala.collection.immutable
+import akka.actor.typed.{ActorRef, Behavior}
 
 //#user-case-classes
 final case class User(name: String, age: Int, countryOfResidence: String)

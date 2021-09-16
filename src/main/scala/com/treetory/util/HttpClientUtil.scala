@@ -1,4 +1,4 @@
-package com.treetory
+package com.treetory.util
 
 import org.slf4j.LoggerFactory
 import scalaj.http.{Http, HttpResponse}

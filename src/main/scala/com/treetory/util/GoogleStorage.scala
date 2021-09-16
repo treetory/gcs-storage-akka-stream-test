@@ -1,7 +1,8 @@
-package com.treetory
+package com.treetory.util
 
 import com.google.cloud.http.HttpTransportOptions
 import com.google.cloud.storage.{Blob, BlobId, Storage, StorageOptions}
+import com.treetory.config.Config
 
 import java.net.URL
 import java.util.concurrent.TimeUnit

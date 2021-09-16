@@ -1,4 +1,4 @@
-package com.treetory
+package com.treetory.actor
 
 import akka.actor.typed.Behavior
 import com.google.cloud.storage.BlobInfo

@@ -1,6 +1,7 @@
 package com.treetory
 
-import com.treetory.UserRegistry.ActionPerformed
+import com.treetory.actor.{Faker, Fakers, User, Users}
+import com.treetory.actor.UserRegistry.ActionPerformed
 import spray.json.RootJsonFormat
 
 import java.net.URL

@@ -1,8 +1,9 @@
-package com.treetory
+package com.treetory.route
 
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
-import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.{_symbol2NR, complete, get, onSuccess, parameter, pathEnd, pathPrefix, redirect, rejectEmptyResponse}
 import akka.http.scaladsl.server.Route
+import com.treetory.util.AkkaHttpClientUtil
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.Future
