@@ -12,12 +12,14 @@ object HttpClientTestRoute {
 
   val httpClientTestRoute: Route =
     pathPrefix("gcs") {
-      pathEnd {
-        get {
-          parameter('fileName.as[String]) { (fileName) =>
-            val signedURL = httpClientUtil.getSignedURL(fileName)
-            logger.info("{}", signedURL)
-            complete(signedURL)
+      pathPrefix("scalaj") {
+        pathEnd {
+          get {
+            parameter('fileName.as[String]) { (fileName) =>
+              val signedURL = httpClientUtil.getSignedURL(fileName)
+              logger.info("{}", signedURL)
+              complete(signedURL)
+            }
           }
         }
       }

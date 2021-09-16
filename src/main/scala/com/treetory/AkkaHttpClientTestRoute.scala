@@ -17,18 +17,20 @@ object AkkaHttpClientTestRoute {
 
   val akkaHttpClientRoutes: Route =
     pathPrefix("gcs") {
-      pathEnd {
-        get {
-          parameter('fileName.as[String]) { (fileName) =>
-            rejectEmptyResponse {
-              onSuccess(getSignedURL(fileName)) { response =>
-                logger.info("{}", response.status.intValue());
-                if (response.status.intValue() == 307) {
-                  redirect(response.getHeader("Location").get().value(), StatusCodes.TemporaryRedirect)
-                } else if (response.status.intValue() == 200) {
-                  complete(StatusCodes.OK)
-                } else {
-                  complete(StatusCodes.NotFound)
+      pathPrefix("akka-http") {
+        pathEnd {
+          get {
+            parameter('fileName.as[String]) { (fileName) =>
+              rejectEmptyResponse {
+                onSuccess(getSignedURL(fileName)) { response =>
+                  logger.info("{}", response.status.intValue());
+                  if (response.status.intValue() == 307) {
+                    redirect(response.getHeader("Location").get().value(), StatusCodes.TemporaryRedirect)
+                  } else if (response.status.intValue() == 200) {
+                    complete(StatusCodes.OK)
+                  } else {
+                    complete(StatusCodes.NotFound)
+                  }
                 }
               }
             }
@@ -36,5 +38,4 @@ object AkkaHttpClientTestRoute {
         }
       }
     }
-
 }

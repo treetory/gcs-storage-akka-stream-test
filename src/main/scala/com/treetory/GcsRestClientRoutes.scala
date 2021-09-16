@@ -22,17 +22,18 @@ object GcsRestClientRoutes {
 
   val gcsRestClientRoutes: Route =
     pathPrefix("gcs") {
-      pathEnd {
-        get {
-          parameter('fileName.as[String]) { (fileName) =>
-            val signedURL = gcsRestClientActor ? GetSignedURL(fileName)
-            logger.info("{}", signedURL)
-            onSuccess(getSignedURL(fileName)) { response =>
-              redirect(response.getHeader("Location").get().value(), StatusCodes.TemporaryRedirect)
+      pathPrefix("actor") {
+        pathEnd {
+          get {
+            parameter('fileName.as[String]) { (fileName) =>
+              val signedURL = gcsRestClientActor ? GetSignedURL(fileName)
+              logger.info("{}", signedURL)
+              onSuccess(getSignedURL(fileName)) { response =>
+                redirect(response.getHeader("Location").get().value(), StatusCodes.TemporaryRedirect)
+              }
             }
           }
         }
       }
     }
-
 }
