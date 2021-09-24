@@ -1,40 +1,66 @@
 package com.treetory.route
 
-import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.http.scaladsl.model.StatusCodes
-import akka.http.scaladsl.server.Directives.{_symbol2NR, get, onSuccess, parameter, pathEnd, pathPrefix, redirect}
-import akka.http.scaladsl.server.Route
-import akka.pattern.ask
+import akka.actor.typed.scaladsl.AskPattern.{Askable, schedulerFromActorSystem}
+import akka.actor.typed.{ActorRef, ActorSystem}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, StatusCodes}
+import akka.http.scaladsl.server.Directives.{_symbol2NR, complete, get, onSuccess, parameter, pathEnd, pathPrefix}
+import akka.http.scaladsl.server.{Directives, Route}
+import akka.stream.scaladsl.FileIO
 import akka.util.Timeout
-import com.treetory.actor.{GcsRestClientActor, GetSignedURL}
-import com.treetory.route.AkkaHttpClientTestRoute.getSignedURL
-import org.slf4j.LoggerFactory
+import com.treetory.JsonFormats
+import com.treetory.actor.GcsRestClientRegistry
+import com.treetory.actor.GcsRestClientRegistry.{Excel, Page}
+import com.treetory.util.PagedList
 
+import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
-object GcsRestClientRoutes {
+class GcsRestClientRoutes(gcsRestClientRegistry: ActorRef[GcsRestClientRegistry.Command])(implicit val system: ActorSystem[_]) {
 
-  implicit val system: ActorSystem = ActorSystem("GoogleCloudStorageAkkaHttpServer")
-  implicit val timeout: Timeout    = Timeout(60.seconds)
+  import JsonFormats._
+  import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+  //#import-json-formats
 
-  def logger = LoggerFactory.getLogger(this.getClass)
+  // If ask takes more time than this to complete the request is failed
+  private implicit val timeout = Timeout(5.minutes)
+  private implicit val executionContext = system.executionContext
 
-  val gcsRestClientActor: ActorRef = system.actorOf(Props[GcsRestClientActor])
+  def getPagedList(token: String): Future[PagedList] = gcsRestClientRegistry.ask(Page(token, _))
 
-  val gcsRestClientRoutes: Route =
+  val gcsRestClientActorRoutes2: Route =
     pathPrefix("gcs") {
-      pathPrefix("actor") {
-        pathEnd {
-          get {
-            parameter('fileName.as[String]) { (fileName) =>
-              val signedURL = gcsRestClientActor ? GetSignedURL(fileName)
-              logger.info("{}", signedURL)
-              onSuccess(getSignedURL(fileName)) { response =>
-                redirect(response.getHeader("Location").get().value(), StatusCodes.TemporaryRedirect)
+      Directives.concat(
+        pathPrefix("registry") {
+          pathEnd {
+            get {
+              parameter('token.as[String]) { (token) =>
+                onSuccess(gcsRestClientRegistry.ask(Page(token, _))) { pagedList =>
+                  complete(StatusCodes.OK, pagedList)
+                }
+              }
+            }
+          }
+        },
+        pathPrefix("excel") {
+          pathEnd {
+            get {
+              parameter('token.as[String]) { (token) =>
+                onSuccess(gcsRestClientRegistry.ask(Excel(token, _))) { file =>
+                  val fileSrc = FileIO.fromPath(file.toPath).watchTermination() { (mat, futDone) =>
+                    futDone.onComplete { _ =>
+                      file.delete()
+                    }
+                    mat
+                  }
+                  complete {
+                    HttpEntity.Default(ContentTypes.`application/octet-stream`, file.length, fileSrc)
+                  }
+                }
               }
             }
           }
         }
-      }
+      )
     }
+
 }

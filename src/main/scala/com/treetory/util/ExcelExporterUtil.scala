@@ -10,9 +10,8 @@ object ExcelExporterUtil {
 
   def logger = LoggerFactory.getLogger(this.getClass)
 
-  def export(sample: Seq[Faker]): Unit = {
+  def fakerExport(sample: Seq[Faker]): Unit = {
 
-//    val tempFile = File.createTempFile("fakerExport", ".xlsx")
     val tempFile = new File("./fakerExport.xlsx")
     val fileOut  = new FileOutputStream(tempFile)
 
@@ -98,7 +97,77 @@ object ExcelExporterUtil {
     workbook.close()
   }
 
-  def getExcel(): File = {
-    new File("./fakerExport.xlsx")
+  def gcsExport(nextPageToken: String): File = {
+    var flag: Boolean = true
+    var token: String = nextPageToken
+
+    val tempFile = new File("./gcsExport.xlsx")
+    val fileOut  = new FileOutputStream(tempFile)
+
+    val workbook = new SXSSFWorkbook
+    workbook.setCompressTempFiles(true)
+
+    val style = workbook.createCellStyle()
+    val font  = workbook.createFont()
+    font.setBold(true)
+    style.setFont(font)
+
+    val sheet: SXSSFSheet = workbook.createSheet("gcs")
+    sheet.setRandomAccessWindowSize(100) // 메모리 행 100개로 제한, 초과 시 Disk로 flush
+
+    val headerRow = sheet.createRow(0)
+
+    var rowIndex: Int = 1
+
+    val columns = List(
+      "blobId",
+      "bucket",
+      "name",
+      "createTime",
+      "deleteTime"
+    )
+
+    while (flag) {
+      val pagedList: PagedList = GoogleStorage.pagedList(token)
+      // 셀 칼럼 크기 설정
+      pagedList.blobInfoList.map(f => {
+        if (rowIndex == 1) {
+          for ((columnName, index) <- columns.zipWithIndex) {
+            val headerCell = headerRow.createCell(index)
+            headerCell.setCellValue(columnName)
+            headerCell.setCellStyle(style)
+          }
+        }
+        val row   = sheet.createRow(rowIndex)
+        val cell0 = row.createCell(0)
+        cell0.setCellValue(f.blobId)
+        val cell1 = row.createCell(1)
+        cell1.setCellValue(f.bucket)
+        val cell2 = row.createCell(2)
+        cell2.setCellValue(f.name)
+        val cell3 = row.createCell(3)
+        cell3.setCellValue(f.createTime)
+        val cell4 = row.createCell(4)
+        cell4.setCellValue(f.deleteTime)
+
+        rowIndex = rowIndex + 1
+      })
+      logger.info(s"${token == pagedList.token}")
+      if (pagedList.token != null && !token.eq(pagedList.token)) {
+        token = pagedList.token
+        flag = true
+      } else {
+        flag = false
+      }
+
+    }
+    workbook.write(fileOut)
+    workbook.close()
+    fileOut.close()
+    tempFile
+  }
+
+  def getExcel(fileName: String): File = {
+    new File(s"./${fileName}")
   }
 }

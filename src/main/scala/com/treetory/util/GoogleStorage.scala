@@ -1,11 +1,26 @@
 package com.treetory.util
 
+import com.google.api.gax.paging.Page
 import com.google.cloud.http.HttpTransportOptions
+import com.google.cloud.storage.Storage.BlobListOption
 import com.google.cloud.storage.{Blob, BlobId, Storage, StorageOptions}
 import com.treetory.config.Config
 
 import java.net.URL
 import java.util.concurrent.TimeUnit
+import scala.collection.mutable.ListBuffer
+
+final case class BlobInfo(
+                         blobId: String,
+                         bucket: String,
+                         name: String,
+                         createTime: Long,
+                         deleteTime: Long
+                         )
+
+final case class BlobInfoList(blobInfoList: List[BlobInfo])
+
+final case class PagedList(token: String, blobInfoList: List[BlobInfo])
 
 trait GoogleStorage {
   val config: Config = Config.default
@@ -38,6 +53,19 @@ trait GoogleStorage {
   def delete(fileName: String): Boolean = {
     val blobId = BlobId.of(config.google.storage.project.bucket, fileName)
     storage.delete(blobId)
+  }
+
+  def pagedList(token: String): PagedList = {
+    val blobInfoList: ListBuffer[BlobInfo] = new ListBuffer[BlobInfo]
+    val pagedList: Page[Blob] = storage.list(
+      config.google.storage.project.bucket,
+      BlobListOption.pageSize(100),
+      BlobListOption.pageToken(token)
+    )
+    pagedList.getValues.forEach(blob => {
+      blobInfoList += BlobInfo(blob.getBlobId.toString, blob.getBucket, blob.getName, blob.getCreateTime, blob.getDeleteTime)
+    })
+    PagedList(pagedList.getNextPageToken, blobInfoList.toList)
   }
 }
 

@@ -4,8 +4,8 @@ import akka.actor.typed.ActorSystem
 import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.{Directives, Route}
-import com.treetory.actor.{FakerRegistry, UserRegistry}
-import com.treetory.route.{AkkaHttpClientTestRoute, FakerRoutes, GcsRestClientRoutes, GoogleStorageRoute, HttpClientTestRoute, UserRoutes}
+import com.treetory.actor.{FakerRegistry, GcsRestClientRegistry, UserRegistry}
+import com.treetory.route.{AkkaHttpClientTestRoute, FakerRoutes, GcsRestClientActorRoutes, GcsRestClientRoutes, GoogleStorageRoute, HttpClientTestRoute, UserRoutes}
 
 import scala.util.{Failure, Success}
 
@@ -37,13 +37,17 @@ object QuickstartApp {
       val fakerRegistryActor = context.spawn(FakerRegistry(), "FakerRegistryActor")
       context.watch(fakerRegistryActor)
 
+      val gcsRestClientActor2 = context.spawn(GcsRestClientRegistry(), "GcsRestClientActor2")
+      context.watch(gcsRestClientActor2)
+
       val routes =
         Directives.concat(
           (new UserRoutes(userRegistryActor)(context.system)).userRoutes,
           (new FakerRoutes(fakerRegistryActor)(context.system)).fakerRoutes,
+          (new GcsRestClientRoutes(gcsRestClientActor2)(context.system)).gcsRestClientActorRoutes2,
           GoogleStorageRoute.googleStorageRoutes,
           AkkaHttpClientTestRoute.akkaHttpClientRoutes,
-          GcsRestClientRoutes.gcsRestClientRoutes,
+          GcsRestClientActorRoutes.gcsRestClientActorRoutes,
           HttpClientTestRoute.httpClientTestRoute
         )
 

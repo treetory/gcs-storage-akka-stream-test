@@ -28,7 +28,7 @@ class FakerRoutes(fakerRegistry: ActorRef[FakerRegistry.Command])(implicit val s
   def getFakers(count: Int): Future[Future[String]] = fakerRegistry.ask(GetFakers(count, _))
   def convertToFakers(text: String): Future[Seq[Faker]] = fakerRegistry.ask(ConvertToFakers(text, _))
   def export(fakers: Seq[Faker]): Future[Unit] = fakerRegistry.ask(CreateExcel(fakers, _))
-  def getExcel(): Future[File] = fakerRegistry.ask(GetExcel(_))
+  def getExcel(fileName: String): Future[File] = fakerRegistry.ask(GetExcel(fileName, _))
 
   val fakerRoutes: Route =
     pathPrefix("faker") {
@@ -55,23 +55,24 @@ class FakerRoutes(fakerRegistry: ActorRef[FakerRegistry.Command])(implicit val s
         },
         pathPrefix("excel") {
           concat(
-            get {
-              onSuccess(getExcel()) { file =>
-                val fileSrc = FileIO.fromPath(file.toPath).watchTermination() { (mat, futDone) =>
-                  futDone.onComplete { _ =>
-                    file.delete()
+            parameter('fileName.as[String]) { fileName =>
+              get {
+                onSuccess(getExcel(fileName)) { file =>
+                  val fileSrc = FileIO.fromPath(file.toPath).watchTermination() { (mat, futDone) =>
+                    futDone.onComplete { _ =>
+                      file.delete()
+                    }
+                    mat
                   }
-                  mat
-                }
-                complete {
+                  complete {
                     HttpEntity.Default(ContentTypes.`application/octet-stream`, file.length, fileSrc)
+                  }
                 }
               }
             }
           )
         }
       )
-
     }
   //#all-routes
 }

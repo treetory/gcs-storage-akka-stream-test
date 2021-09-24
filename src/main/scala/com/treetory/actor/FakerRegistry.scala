@@ -5,7 +5,7 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, Behavior}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest, HttpResponse, Uri}
-import com.treetory.util.ExcelExporterUtil.{`export`, getExcel}
+import com.treetory.util.ExcelExporterUtil.{fakerExport, getExcel}
 import org.slf4j.LoggerFactory
 import spray.json.DefaultJsonProtocol._
 import spray.json._
@@ -42,7 +42,7 @@ object FakerRegistry {
   final case class GetFakers(count:Int, replyTo: ActorRef[Future[String]]) extends Command
   final case class ConvertToFakers(text: String, replyTo: ActorRef[Seq[Faker]]) extends Command
   final case class CreateExcel(fakers: Seq[Faker], replyTo: ActorRef[Unit]) extends Command
-  final case class GetExcel(replyTo: ActorRef[File]) extends Command
+  final case class GetExcel(fileName: String, replyTo: ActorRef[File]) extends Command
 
   def logger = LoggerFactory.getLogger(this.getClass)
 
@@ -110,10 +110,10 @@ object FakerRegistry {
         replyTo ! convertToFakers(text)
         Behaviors.same
       case CreateExcel(faker: Seq[Faker], replyTo) =>
-        replyTo ! export(faker)
+        replyTo ! fakerExport(faker)
         Behaviors.same
-      case GetExcel(replyTo) =>
-        replyTo ! getExcel()
+      case GetExcel(fileName: String, replyTo) =>
+        replyTo ! getExcel(fileName)
         Behaviors.same
     }
 
