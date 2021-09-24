@@ -11,7 +11,7 @@ import spray.json.DefaultJsonProtocol._
 import spray.json._
 
 import java.io.File
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 
 final case class Faker(
@@ -39,10 +39,11 @@ object FakerRegistry {
   implicit val dispatcher = system.dispatcher
 
   sealed trait Command
-  final case class GetFakers(count:Int, replyTo: ActorRef[Future[String]]) extends Command
+  final case class GetFakers(count:Int, replyTo: ActorRef[Future[Seq[Faker]]]) extends Command
   final case class ConvertToFakers(text: String, replyTo: ActorRef[Seq[Faker]]) extends Command
   final case class CreateExcel(fakers: Seq[Faker], replyTo: ActorRef[Unit]) extends Command
   final case class GetExcel(fileName: String, replyTo: ActorRef[File]) extends Command
+  final case class GetPagedFakers(count: Int, replyTo: ActorRef[File]) extends Command
 
   def logger = LoggerFactory.getLogger(this.getClass)
 
@@ -54,7 +55,7 @@ object FakerRegistry {
   val port = 7000
   val path = Uri.Path("/api/faker")
 
-  def getMockup(count: Int): Future[String] = {
+  def getMockup(count: Int): Future[Seq[Faker]] = {
     val uri = Uri()
       .withScheme(scheme)
       .withHost(host)
@@ -71,13 +72,13 @@ object FakerRegistry {
         .toStrict(60.seconds, 100000000)
         .map(res => {
           val str: String = res.data.utf8String
-          str
+          convertToFakers(str)
         })
       )
   }
 
   def convertToFakers(text: String): Seq[Faker] = {
-    logger.debug("{}", text)
+//    logger.debug("{}", text)
     val jsonObj = text.parseJson.convertTo[JsObject].fields("data").convertTo[JsArray].elements
     jsonObj.map(a => {
       val ff = a.asJsObject
@@ -101,6 +102,16 @@ object FakerRegistry {
     })
   }
 
+  def getPagedFakersExcelFile(count: Int): File = {
+    var turn :Int = 100
+    while(turn > 0) {
+      val result = Await.result(getMockup(count), 5.seconds)
+      fakerExport(result)
+      turn = turn - 1
+    }
+    getExcel("fakerExport.xlsx")
+  }
+
   private def registry(): Behavior[Command] =
     Behaviors.receiveMessage {
       case GetFakers(count: Int, replyTo) =>
@@ -114,6 +125,9 @@ object FakerRegistry {
         Behaviors.same
       case GetExcel(fileName: String, replyTo) =>
         replyTo ! getExcel(fileName)
+        Behaviors.same
+      case GetPagedFakers(count: Int, replyTo) =>
+        replyTo ! getPagedFakersExcelFile(count)
         Behaviors.same
     }
 
