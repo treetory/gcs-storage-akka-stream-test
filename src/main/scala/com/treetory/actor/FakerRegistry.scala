@@ -44,6 +44,7 @@ object FakerRegistry {
   final case class CreateExcel(fakers: Seq[Faker], replyTo: ActorRef[Unit]) extends Command
   final case class GetExcel(fileName: String, replyTo: ActorRef[File]) extends Command
   final case class GetPagedFakers(count: Int, replyTo: ActorRef[File]) extends Command
+  final case class GetTotalFakers(count: Int, replyTo: ActorRef[File]) extends Command
 
   def logger = LoggerFactory.getLogger(this.getClass)
 
@@ -112,6 +113,12 @@ object FakerRegistry {
     getExcel("fakerExport.xlsx")
   }
 
+  def getTotalFakersExcelFile(count: Int): File = {
+    val result = Await.result(getMockup(count), 300.seconds)
+    fakerExport(result)
+    getExcel("fakerExport.xlsx")
+  }
+
   private def registry(): Behavior[Command] =
     Behaviors.receiveMessage {
       case GetFakers(count: Int, replyTo) =>
@@ -128,6 +135,9 @@ object FakerRegistry {
         Behaviors.same
       case GetPagedFakers(count: Int, replyTo) =>
         replyTo ! getPagedFakersExcelFile(count)
+        Behaviors.same
+      case GetTotalFakers(count: Int, replyTo) =>
+        replyTo ! getTotalFakersExcelFile(count)
         Behaviors.same
     }
 
